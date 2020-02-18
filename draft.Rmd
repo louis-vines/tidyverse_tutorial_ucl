@@ -1,0 +1,240 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+#### Motivating Example
+
+get a cool example...
+
+#### History of R
+
+* Stems from S which was created in 1975–1976
+  
+  - Prior to S statistics was done in Fortran
+  
+  - S was designed to run interactively with consistent interface to many statistical routines
+  
+  - Created as an IDE with a REPL and connected graphics device
+  
+  - S-PLUS was commercial, in 1992 R was created
+  
+  - "[R] is very similar in appearance to S, the underlying implementation and semantics are derived from Scheme" (R-FAQ)
+
+
+#### Process of data analysis should be have fast iterations
+  
+![Alt text](./images/data-science-explore.png)
+
+
+## Show of graphics around distance of thoughts to computer
+
+## Good things about base R
+
+- Dataframes are native
+
+```{r}
+mtcars
+```
+
+- Vectorisation is native
+
+```{r}
+mtcars$cyl * 2
+```
+
+```{r}
+mtcars$wt / mtcars$hp
+```
+
+```{r}
+as.Date('2020-01-01') + lubridate::days(0:30)
+```
+```{r}
+paste('letter number', seq_along(letters), 'in the alphabet is', letters)
+```
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+## lazy argument evaluation & non-standard evaluation
+
+```{r}
+x <- seq(0, 2 * pi, length.out = 360)
+plot(x, sin(x), type = 'l')
+```
+
+This is a very appealing feature for writing DSLs in the language
+
+```{r}
+'aaa' + 'bbb'
+```
+
+```{r}
+string_math <- function(x) {
+  e <- rlang::env(
+    rlang::caller_env(),
+    `+` = function(x, y) paste0(x, y),
+    `*` = function(x, y) strrep(x, y)
+  )
+
+  eval(rlang::enexpr(x), e)
+}
+
+string_math('aaa' + 'bbb')
+string_math('rep' * 2)
+```
+
+functions are very first class
+
+```{r}
+# how I assign a variable
+string <- 'a'
+
+# how I assign a fn
+st_dev_fn <- function(input_data){
+  sum_squares <- sum((input_data - mean(input_data)) ^ 2)
+  sqrt(sum_squares)
+}
+
+class(st_dev_fn)
+```
+
+```{r}
+st_dev_fn(1:20)
+```
+```{r}
+st_dev_fn
+```
+
+
+```{r}
+(function(input_data){
+  sum_squares <- sum((input_data - mean(input_data)) ^ 2)
+  sqrt(sum_squares)
+})(1:20)
+```
+
+## Bad things about base R
+
+# - Many ways to do the same thing
+
+# - Some of these are convoluted and obscure intent
+
+- Is a memory hog (very keen to copy data around)
+
+- Base language is carrying around a ton of warts
+
+```{r}
+1 + 2
+1 + NA
+```
+
+```{r}
+paste0('a', 'b')
+paste0('a', NA)
+```
+
+When you don't understand R's internals, things like this can happen:
+
+```{r}
+# note to me: change the output type...
+bad_df <- read.csv('data/bad_data.csv')
+bad_df$x + bad_df$y
+```
+
+```{r}
+bad_df$y_numeric <- as.numeric(bad_df$y)
+bad_df
+```
+
+what happened here:
+
+- R encodes any non-numeric data in dataframe as factor (categorical data) by default(!!!)
+- The underlying encoding of these are integers assigned in alphabetical order
+
+```{r}
+slightly_better_df <- read.csv('data/bad_data.csv', stringsAsFactors = FALSE)
+as.numeric(slightly_better_df$y)
+```
+
+```{r}
+data.frame(x = letters)
+```
+
+## Tidyverse to the rescue!!!!
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+better_df <- read_csv('data/bad_data.csv')
+better_df
+```
+
+```{r}
+better_df %>% print(n=Inf)
+```
+
+```{r}
+better_df %>% mutate(y = as.numeric(y)) %>% print(n=Inf)
+```
+
+
+and the previous example...
+```{r}
+# NOTE TO ME: change the output style back...
+
+```
+
+# Look at dplyr verbs
+
+* select columns with `select` function
+* new columns with `mutate` function
+* filter rows with `filter` function
+* sort data using `arrange` function
+
+```{r}
+data("starwars")
+```
+
+SELECT VERB:
+
+base R
+```{r}
+starwars[, 'hair_color']
+```
+
+```{r}
+starwars[, 4:6]
+```
+
+```{r}
+starwars %>% select(matches('[rn]_c'))
+```
+
+
+## A pipe operator !!
+
+```{r}
+select(starwars, hair_color)
+```
+
+f(x, y) <--> x %>% f(y)
+```{r}
+starwars %>%
+  select(height, gender) %>%
+  arrange(height)
+```
+
+
+
+```{r}
+x %>% add(5) %>% divide_by(2)
+```
+
+```{r}
+mtcars %>% lm(hp ~ qsec, data = .) %>% summary()
+```

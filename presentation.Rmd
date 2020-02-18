@@ -1,0 +1,41 @@
+---
+title: "Data Wrangling with Tidyverse"
+output: revealjs::revealjs_presentation
+---
+
+## History of R
+
+<style>
+  .reveal section img { background:none; border:none; box-shadow:none; }
+</style>
+
+
+* Stems from S which was created in 1975–1976
+  
+  - Prior to S statistics was done in Fortran
+  
+  - S was designed to run interactively with consistent interface to many statistical routines
+  
+  - Created as an IDE with a REPL and connected graphics device
+  
+  - S-PLUS was commercial, in 1992 R was created
+  
+  - "[R] is very similar in appearance to S, the underlying implementation and semantics are derived from Scheme" (R-FAQ)
+
+## Analysing data
+
+```{r fig.width=15, fig.height=10,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("./images/data-science-explore.png")
+ grid.raster(img)
+```
+
+## Show slides computer vs brain...
+
+## Tidyverse packages
+
+```{r fig.width=15, fig.height=10,echo=FALSE}
+img <- readPNG("./images/tidyverse-packages.png")
+ grid.raster(img)
+```
